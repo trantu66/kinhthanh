@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kinh Thánh Online 2026</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f1ea; margin: 0; color: #333; }
+        header { background: #2c3e50; color: white; padding: 15px; text-align: center; position: relative; }
+        .container { max-width: 800px; margin: 20px auto; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        select, input, textarea { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        button { background: #d35400; color: white; border: none; padding: 12px; cursor: pointer; width: 100%; font-size: 16px; border-radius: 4px; }
+        button:hover { background: #e67e22; }
+        .bible-box { min-height: 200px; padding: 15px; border-top: 2px solid #2c3e50; margin-top: 20px; white-space: pre-line; font-size: 18px; line-height: 1.8; }
+        #admin-panel { display: none; margin-top: 30px; padding-top: 20px; border-top: 2px dashed #ccc; }
+        #login-btn { position: absolute; right: 15px; top: 15px; background: #34495e; width: auto; padding: 5px 10px; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Kinh Thánh Trực Tuyến</h1>
+    <button id="login-btn" onclick="loginAdmin()">🔑 Admin Đăng nhập</button>
+</header>
+
+<div class="container">
+    <h3>📖 Chọn nội dung xem</h3>
+    <div style="display: flex; gap: 10px;">
+        <select id="read-book">
+            <option value="Sáng thế ký">Sáng thế ký</option>
+            <option value="Xuất Ê-díp-tô Ký">Xuất Ê-díp-tô Ký</option>
+            <option value="Ma-thi-ơ">Ma-thi-ơ</option>
+            <option value="Giăng">Giăng</option>
+        </select>
+        <input type="number" id="read-chapter" value="1" min="1" style="width: 80px;">
+        <button onclick="readBible()" style="width: auto;">Đọc</button>
+    </div>
+
+    <div class="bible-box" id="bible-content">
+        Hãy chọn Sách, Chương và nhấn "Đọc" để xem nội dung.
+    </div>
+
+    <div id="admin-panel">
+        <h3 style="color: #d35400;">✍️ Khu vực Quản trị (Thêm/Sửa nội dung)</h3>
+        <label>Tên Sách:</label>
+        <input type="text" id="add-book" placeholder="Ví dụ: Sáng thế ký">
+        
+        <label>Chương:</label>
+        <input type="number" id="add-chapter" value="1">
+
+        <label>Nội dung kinh thánh:</label>
+        <textarea id="add-content" rows="10" placeholder="Nhập văn bản lời Chúa ở đây..."></textarea>
+        
+        <button onclick="saveBible()">💾 Lưu lên mạng</button>
+    </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+<script>
+    // 👇 CHÌA KHÓA BÍ MẬT CỦA BẠN ĐÃ ĐƯỢC ĐIỀN SẴN Ở ĐÂY 👇
+    const firebaseConfig = {
+        apiKey: "AIzaSyCClWBrQEfF7gwt5X2Z7yRai_gTMJm07ig",
+        authDomain: "kinhthanh-db51f.firebaseapp.com",
+        projectId: "kinhthanh-db51f",
+        storageBucket: "kinhthanh-db51f.firebasestorage.app",
+        messagingSenderId: "1015931106833",
+        appId: "1:1015931106833:web:b3310c419534c93682e3b0",
+        measurementId: "G-MT017M7TL5"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    let isLogin = false;
+
+    // Chức năng đăng nhập
+    function loginAdmin() {
+        if(!isLogin) {
+            const user = prompt("Nhập tài khoản:");
+            const pass = prompt("Nhập mật khẩu:");
+
+            if(user === "kinhthanh2026" && pass === "11112006") {
+                alert("Chúc mừng! Bạn đã đăng nhập thành công.");
+                isLogin = true;
+                document.getElementById('admin-panel').style.display = 'block';
+                document.getElementById('login-btn').innerText = "🔓 Đăng xuất";
+            } else {
+                alert("Sai tài khoản hoặc mật khẩu rồi bạn ơi!");
+            }
+        } else {
+            isLogin = false;
+            document.getElementById('admin-panel').style.display = 'none';
+            document.getElementById('login-btn').innerText = "🔑 Admin Đăng nhập";
+        }
+    }
+
+    // Chức năng Admin Lưu bài viết lên Firebase
+    function saveBible() {
+        if(!isLogin) return alert("Bạn chưa đăng nhập!");
+
+        const book = document.getElementById('add-book').value.trim();
+        const chapter = parseInt(document.getElementById('add-chapter').value);
+        const content = document.getElementById('add-content').value.trim();
+
+        if(!book || !chapter || !content) return alert("Vui lòng điền đủ thông tin!");
+
+        const docId = `${book.replace(/\s+/g, '')}_ch${chapter}`;
+
+        db.collection("bible_data").doc(docId).set({
+            book: book,
+            chapter: chapter,
+            content: content
+        })
+        .then(() => {
+            alert("Đã lưu dữ liệu Kinh Thánh thành công!");
+            document.getElementById('add-content').value = ""; 
+        })
+        .catch(err => {
+            alert("Có lỗi xảy ra, hãy kiểm tra lại cấu hình Firebase!");
+            console.error(err);
+        });
+    }
+
+    // Chức năng Người dùng Đọc bài viết từ Firebase
+    function readBible() {
+        const book = document.getElementById('read-book').value;
+        const chapter = parseInt(document.getElementById('read-chapter').value);
+        const display = document.getElementById('bible-content');
+
+        display.innerText = "Đang tải dữ liệu...";db.collection("bible_data")
+          .where("book", "==", book)
+          .where("chapter", "==", chapter)
+          .get()
+          .then((querySnapshot) => {
+              if (querySnapshot.empty) {
+                  display.innerText = "Nội dung Sách/Chương này chưa có dữ liệu. Xin Admin cập nhật thêm!";
+              } else {
+                  querySnapshot.forEach((doc) => {
+                      display.innerText = doc.data().content;
+                  });
+              }
+          })
+          .catch(err => {
+              display.innerText = "Lỗi khi lấy dữ liệu từ mạng.";
+          });
+    }
+</script>
+</body>
+</html>
