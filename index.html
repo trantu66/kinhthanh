@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kinh Thánh Online 2026</title>
+    <title>Kinh Thánh Online 2026 - Bản Hoàn Chỉnh</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -48,6 +48,14 @@
             background-color: #e67e22;
             color: white;
         }
+        /* Style cho danh sách admin */
+        #admin-list-container {
+            max-height: 335px; 
+            overflow-y: auto;
+        }
+        .list-group-item:hover {
+            background-color: #f8f9fa;
+        }
     </style>
 </head>
 <body>
@@ -55,7 +63,7 @@
     <nav class="navbar navbar-dark nav-admin sticky-top">
         <div class="container d-flex justify-content-between">
             <a class="navbar-brand fw-bold" href="#"><i class="fa-solid fa-book-bible me-2"></i>Kinh Thánh Trực Tuyến</a>
-            <button id="login-btn" onclick="loginAdmin()" class="btn btn-outline-light btn-sm">
+            <button id="login-btn" onclick="handleAuthAction()" class="btn btn-outline-light btn-sm">
                 <i class="fa-solid fa-lock me-1"></i> Admin Đăng nhập
             </button>
         </div>
@@ -68,13 +76,12 @@
                 Chào mừng bạn đến với trang web đọc Kinh Thánh Online. Kinh Thánh không chỉ là một cuốn sách tôn giáo, mà là bức thư tình yêu thương, là kim chỉ nam và là nguồn bình an vô tận cho tâm hồn mỗi người. Hãy mở lòng lắng nghe lời Chúa mỗi ngày.
             </p>
         </div>
-    </div>
-
-    <div class="container">
+    </div><div class="container">
         <div class="row">
             
             <div class="col-lg-8">
-                <div class="card card-custom p-4"><h4 class="fw-bold mb-3 text-secondary"><i class="fa-solid fa-book-open me-2"></i>Chọn nội dung xem</h4>
+                <div class="card card-custom p-4">
+                    <h4 class="fw-bold mb-3 text-secondary"><i class="fa-solid fa-book-open me-2"></i>Chọn nội dung xem</h4>
                     
                     <div class="row g-2 mb-3">
                         <div class="col-md-5">
@@ -118,10 +125,10 @@
 
                 <div class="row">
                     <div class="col-md-6 mb-4">
-                        <div class="p-3 border rounded h-100 bg-light">
-                            <h5 class="fw-bold text-dark mb-3"><i class="fa-solid fa-plus me-2"></i>Thêm & Sửa bài viết</h5>
+                        <div class="p-3 border rounded h-100 bg-light"><h5 class="fw-bold text-dark mb-3"><i class="fa-solid fa-plus me-2"></i>Thêm & Sửa bài viết</h5>
                             
-                            <label class="form-label fw-bold">Tên Sách:</label><input type="text" id="add-book" class="form-control mb-2" placeholder="Ví dụ: Sáng thế ký">
+                            <label class="form-label fw-bold">Tên Sách:</label>
+                            <input type="text" id="add-book" class="form-control mb-2" placeholder="Ví dụ: Sáng thế ký">
                             
                             <label class="form-label fw-bold">Chương:</label>
                             <input type="number" id="add-chapter" class="form-control mb-2" value="1" min="1">
@@ -138,7 +145,7 @@
                             <h5 class="fw-bold text-dark mb-3"><i class="fa-solid fa-trash-can me-2"></i>Danh sách & Xóa bài</h5>
                             <button onclick="loadAdminList()" class="btn btn-secondary btn-sm mb-3"><i class="fa-solid fa-rotate me-2"></i>Làm mới danh sách</button>
                             
-                            <div id="admin-list-container" class="border rounded bg-white p-2" style="max-height: 335px; overflow-y: auto;">
+                            <div id="admin-list-container" class="border rounded bg-white p-2">
                                 <div class="text-muted p-2">Bấm tải danh sách để xem nội dung...</div>
                             </div>
                         </div>
@@ -149,10 +156,11 @@
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
     <script>
-        // Cấu hình Firebase giữ nguyên chìa khóa của bạn
+        // 1. CẤU HÌNH FIREBASE (Giữ nguyên chìa khóa của bạn)
         const firebaseConfig = {
             apiKey: "AIzaSyCClWBrQEfF7gwt5X2Z7yRai_gTMJm07ig",
             authDomain: "kinhthanh-db51f.firebaseapp.com",
@@ -163,107 +171,154 @@
             measurementId: "G-MT017M7TL5"
         };
 
+        // 2. KHỞI TẠO CÁC DỊCH VỤ FIREBASE
         firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
+        const db = firebase.firestore(); // Dịch vụ cơ sở dữ liệu
+        const auth = firebase.auth();   // Dịch vụ xác thực// Biến trạng thái đăng nhập toàn cục
+        let isUserLoggedIn = false;
 
-        let isLogin = false;
+        // 3. THEO DÕI TRẠNG THÁI ĐĂNG NHẬP TỰ ĐỘNG (Bảo mật thực sự)
+        // Hàm này sẽ tự chạy khi trang web tải hoặc khi user đăng nhập/đăng xuất
+        auth.onAuthStateChanged((user) => {
+            const adminPanel = document.getElementById('admin-panel');
+            const loginBtn = document.getElementById('login-btn');
 
-        // Giữ nguyên thông tin đăng nhập theo yêu cầu của bạn
-        function loginAdmin() {
-            if(!isLogin) {
-                const user = prompt("Nhập tài khoản:");
+            if (user) {
+                // Đã đăng nhập thành công
+                isUserLoggedIn = true;
+                adminPanel.style.display = 'block'; // Hiện bảng quản trị
+                loginBtn.innerHTML = '<i class="fa-solid fa-unlock me-1"></i> Đăng xuất';
+                loginBtn.classList.remove('btn-outline-light');
+                loginBtn.classList.add('btn-light', 'text-dark');
+                loadAdminList(); // Tự động tải danh sách bài viết
+            } else {
+                // Chưa đăng nhập hoặc đã đăng xuất
+                isUserLoggedIn = false;
+                adminPanel.style.display = 'none'; // Ẩn bảng quản trị
+                loginBtn.innerHTML = '<i class="fa-solid fa-lock me-1"></i> Admin Đăng nhập';
+                loginBtn.classList.remove('btn-light', 'text-dark');
+                loginBtn.classList.add('btn-outline-light');
+                // Xóa nội dung hiển thị của admin list
+                document.getElementById('admin-list-container').innerHTML = '<div class="text-muted p-2">Vui lòng đăng nhập...</div>';
+            }
+        });
+
+        // 4. XỬ LÝ BẤM NÚT ĐĂNG NHẬP / ĐĂNG XUẤT
+        function handleAuthAction() {
+            if (!isUserLoggedIn) {
+                // Thực hiện Đăng nhập thật (Gọi tới Firebase)
+                const email = prompt("Nhập Email quản trị (Ví dụ: admin@gmail.com):");
                 const pass = prompt("Nhập mật khẩu:");
 
-                if(user === "kinhthanh2026" && pass === "11112006") {
-                    alert("Chúc mừng! Bạn đã đăng nhập thành công.");isLogin = true;
-                    document.getElementById('admin-panel').style.display = 'block';
-                    document.getElementById('login-btn').innerHTML = '<i class="fa-solid fa-unlock me-1"></i> Đăng xuất';
-                    loadAdminList(); // Tự động load danh sách khi vừa đăng nhập
-                } else {
-                    alert("Sai tài khoản hoặc mật khẩu rồi bạn ơi!");
-                }
+                if (!email || !pass) return; // Người dùng bấm Hủy
+
+                // Gọi hàm đăng nhập của Firebase
+                auth.signInWithEmailAndPassword(email, pass)
+                    .then((userCredential) => {
+                        // Đăng nhập thành công (onAuthStateChanged sẽ tự xử lý giao diện)
+                        alert("Chúc mừng! Bạn đã đăng nhập thành công.");
+                    })
+                    .catch((error) => {
+                        // Đăng nhập thất bại
+                        alert("Sai tài khoản hoặc mật khẩu! Vui lòng kiểm tra lại cấu hình Firebase Auth.\nChi tiết: " + error.message);
+                        console.error("Lỗi đăng nhập:", error);
+                    });
             } else {
-                isLogin = false;
-                document.getElementById('admin-panel').style.display = 'none';
-                document.getElementById('login-btn').innerHTML = '<i class="fa-solid fa-lock me-1"></i> Admin Đăng nhập';
+                // Thực hiện Đăng xuất thật
+                if(confirm("Bạn có chắc chắn muốn đăng xuất không?")) {auth.signOut().then(() => {
+                        alert("Đã đăng xuất thành công!");
+                    });
+                }
             }
         }
 
-        // ĐỌC DỮ LIỆU (Cho người dùng xem)
+        // 5. ĐỌC DỮ LIỆU KINH THÁNH (Dành cho mọi người dùng)
         function readBible() {
             const book = document.getElementById('read-book').value;
             const chapter = parseInt(document.getElementById('read-chapter').value);
             const display = document.getElementById('bible-content');
 
-            display.innerHTML = '<div class="text-center text-muted"><i class="fa-solid fa-spinner fa-spin me-2"></i>Đang tải dữ liệu...</div>';
+            // Hiển thị trạng thái đang tải
+            display.innerHTML = '<div class="text-center text-muted p-5"><i class="fa-solid fa-spinner fa-spin fa-2x me-2"></i><br>Đang tải lời Chúa...</div>';
 
+            // Truy vấn Firestore: Lấy bài viết khớp với Sách và Chương
             db.collection("bible_data")
               .where("book", "==", book)
               .where("chapter", "==", chapter)
               .get()
               .then((querySnapshot) => {
                   if (querySnapshot.empty) {
-                      display.innerHTML = '<span class="text-danger"><i class="fa-solid fa-triangle-exclamation me-2"></i>Nội dung này chưa được Admin tải lên.</span>';
+                      // Không tìm thấy dữ liệu
+                      display.innerHTML = '<div class="alert alert-warning m-0"><i class="fa-solid fa-triangle-exclamation me-2"></i>Nội dung này chưa được Admin tải lên. Vui lòng chọn sách hoặc chương khác.</div>';
                   } else {
+                      // Tìm thấy dữ liệu, hiển thị nội dung
                       querySnapshot.forEach((doc) => {
                           display.innerText = doc.data().content;
                       });
                   }
               })
               .catch(err => {
-                  display.innerText = "Lỗi khi lấy dữ liệu từ mạng.";
-                  console.error(err);
+                  // Lỗi mạng hoặc lỗi cấu hình Rules
+                  display.innerHTML = '<div class="alert alert-danger m-0"><i class="fa-solid fa-circle-xmark me-2"></i>Lỗi khi lấy dữ liệu từ mạng. Kiểm tra Firestore Rules.</div>';
+                  console.error("Lỗi đọc dữ liệu:", err);
               });
         }
 
-        // LƯU DỮ LIỆU LÊN FIREBASE (Admin)
+        // 6. LƯU DỮ LIỆU LÊN FIREBASE (Chỉ dành cho Admin đã đăng nhập)
         function saveBible() {
-            if(!isLogin) return alert("Bạn chưa đăng nhập!");
+            if (!isUserLoggedIn) return alert("Bạn chưa đăng nhập! Không có quyền thực hiện.");
 
             const book = document.getElementById('add-book').value.trim();
             const chapter = parseInt(document.getElementById('add-chapter').value);
             const content = document.getElementById('add-content').value.trim();
 
-            if(!book || !chapter || !content) return alert("Vui lòng điền đủ thông tin!");
+            // Kiểm tra nhập liệu cơ bản
+            if (!book || isNaN(chapter) || !content) return alert("Vui lòng điền đủ thông tin: Sách, Chương (số) và Nội dung!");
 
+            // Tạo ID tài liệu cố định để dễ quản lý (Ví dụ: Sangtheky_ch1)
             const docId = `${book.replace(/\s+/g, '')}_ch${chapter}`;
 
-            db.collection("bible_data").doc(docId).set({
-                book: book,
+            // Lưu hoặc Ghi đè tài liệu trong Firestore
+            db.collection("bible_data").doc(docId).set({book: book,
                 chapter: chapter,
-                content: content
+                content: content,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp() // Thêm thời gian cập nhật
             })
             .then(() => {
                 alert("Đã lưu dữ liệu Kinh Thánh thành công!");
-                document.getElementById('add-content').value = ""; 
-                loadAdminList(); // Làm mới lại danh sách xóa})
+                document.getElementById('add-content').value = ""; // Xóa nội dung ô nhập liệu
+                loadAdminList(); // Làm mới lại danh sách quản trị
+            })
             .catch(err => {
-                alert("Có lỗi xảy ra, hãy kiểm tra lại cấu hình Firebase!");
-                console.error(err);
+                alert("Có lỗi xảy ra, không thể lưu! Hãy kiểm tra lại cấu hình Firestore Rules (phải cho phép ghi khi đã auth).");
+                console.error("Lỗi lưu dữ liệu:", err);
             });
         }
 
-        // 🌟 TÍNH NĂNG MỚI: TẢI DANH SÁCH BÀI VIẾT ĐỂ QUẢN LÝ
+        // 7. TẢI DANH SÁCH BÀI VIẾT ĐỂ QUẢN LÝ (Admin)
         function loadAdminList() {
-            if(!isLogin) return;
-            const listContainer = document.getElementById('admin-list-container');
-            listContainer.innerHTML = '<div class="p-2 text-muted"><i class="fa-solid fa-spinner fa-spin me-2"></i>Đang quét dữ liệu...</div>';
+            if (!isUserLoggedIn) return;
 
+            const listContainer = document.getElementById('admin-list-container');
+            listContainer.innerHTML = '<div class="p-2 text-muted"><i class="fa-solid fa-spinner fa-spin me-2"></i>Đang quét toàn bộ dữ liệu...</div>';
+
+            // Lấy toàn bộ tài liệu trong collection "bible_data"
             db.collection("bible_data").get().then((querySnapshot) => {
-                if(querySnapshot.empty) {
-                    listContainer.innerHTML = '<div class="p-2 text-muted">Trống (Chưa có bài viết nào).</div>';
+                if (querySnapshot.empty) {
+                    listContainer.innerHTML = '<div class="p-2 text-muted">Trống (Chưa có bài viết nào được tạo).</div>';
                     return;
                 }
 
-                let htmlContent = '<ul class="list-group list-group-flush">';
+                let htmlContent = '<ul class="list-group list-group-flush border rounded">';
                 querySnapshot.forEach((doc) => {
                     const data = doc.data();
+                    // Tạo HTML cho từng dòng, bao gồm nút Xóa
                     htmlContent += `
                         <li class="list-group-item d-flex justify-content-between align-items-center p-2">
                             <div>
                                 <strong class="text-dark">${data.book}</strong> - Chương ${data.chapter}
                             </div>
-                            <button class="btn btn-outline-danger btn-sm" onclick="deleteBible('${doc.id}', '${data.book}', ${data.chapter})">
+                            <button class="btn btn-outline-danger btn-sm" title="Xóa bài này" onclick="deleteBible('${doc.id}', '${data.book}', ${data.chapter})">
                                 <i class="fa-solid fa-trash-can"></i>
                             </button>
                         </li>
@@ -272,23 +327,24 @@
                 htmlContent += '</ul>';
                 listContainer.innerHTML = htmlContent;
             }).catch(err => {
-                listContainer.innerHTML = '<div class="p-2 text-danger">Lỗi khi tải danh sách.</div>';
-                console.error(err);
+                listContainer.innerHTML = '<div class="p-2 text-danger">Lỗi khi tải danh sách. Kiểm tra quyền đọc dữ liệu.</div>';
+                console.error("Lỗi tải danh sách admin:", err);
             });
         }
 
-        // 🌟 TÍNH NĂNG MỚI: XÓA NỘI DUNG (Admin)
+        // 8. XÓA NỘI DUNG KINH THÁNH (Admin)
         function deleteBible(docId, book, chapter) {
-            if(!isLogin) return;
+            if (!isUserLoggedIn) return;// Yêu cầu xác nhận trước khi xóa
+            const confirmDelete = confirm(`HÀNH ĐỘNG NÀY KHÔNG THỂ HOÀN TÁC!\n\nBạn có chắc chắn muốn xóa vĩnh viễn dữ liệu của "${book} - Chương ${chapter}" không?`);
             
-            const confirmDelete = confirm(`Bạn có chắc chắn muốn xóa "${book} - Chương ${chapter}" không? Hành động này không thể hoàn tác!`);
-            if(confirmDelete) {
+            if (confirmDelete) {
+                // Gọi hàm xóa tài liệu của Firestore
                 db.collection("bible_data").doc(docId).delete().then(() => {
                     alert(`Đã xóa thành công ${book} - Chương ${chapter}`);
                     loadAdminList(); // Cập nhật lại danh sách sau khi xóa
                 }).catch(err => {
-                    alert("Xóa thất bại. Kiểm tra quyền Firebase.");
-                    console.error(err);
+                    alert("Xóa thất bại. Hãy kiểm tra lại cấu hình Firestore Rules (phải cho phép xóa khi đã auth).");
+                    console.error("Lỗi xóa dữ liệu:", err);
                 });
             }
         }
