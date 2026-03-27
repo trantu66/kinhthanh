@@ -4,147 +4,294 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kinh Thánh Online 2026</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f1ea; margin: 0; color: #333; }
-        header { background: #2c3e50; color: white; padding: 15px; text-align: center; position: relative; }
-        .container { max-width: 800px; margin: 20px auto; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        select, input, textarea { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-        button { background: #d35400; color: white; border: none; padding: 12px; cursor: pointer; width: 100%; font-size: 16px; border-radius: 4px; }
-        button:hover { background: #e67e22; }
-        .bible-box { min-height: 200px; padding: 15px; border-top: 2px solid #2c3e50; margin-top: 20px; white-space: pre-line; font-size: 18px; line-height: 1.8; }
-        #admin-panel { display: none; margin-top: 30px; padding-top: 20px; border-top: 2px dashed #ccc; }
-        #login-btn { position: absolute; right: 15px; top: 15px; background: #34495e; width: auto; padding: 5px 10px; font-size: 14px; }
+        body { 
+            background-color: #f4f1ea; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            color: #333; 
+        }
+        .hero-section {
+            background: linear-gradient(rgba(44, 62, 80, 0.85), rgba(44, 62, 80, 0.85)), url('https://picsum.photos/1200/400?grayscale');
+            background-size: cover;
+            background-position: center;
+            color: white;
+            padding: 80px 0;
+            margin-bottom: 30px;
+        }
+        .card-custom {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+            background: white;
+            margin-bottom: 25px;
+        }
+        .bible-box {
+            background-color: #fffcf5;
+            border-left: 4px solid #d35400;
+            font-size: 1.15rem;
+            line-height: 2;
+            white-space: pre-line;
+            min-height: 250px;
+        }
+        .nav-admin {
+            background-color: #2c3e50;
+        }
+        .btn-orange {
+            background-color: #d35400;
+            color: white;
+        }
+        .btn-orange:hover {
+            background-color: #e67e22;
+            color: white;
+        }
     </style>
 </head>
 <body>
 
-<header>
-    <h1>Kinh Thánh Trực Tuyến</h1>
-    <button id="login-btn" onclick="loginAdmin()">🔑 Admin Đăng nhập</button>
-</header>
+    <nav class="navbar navbar-dark nav-admin sticky-top">
+        <div class="container d-flex justify-content-between">
+            <a class="navbar-brand fw-bold" href="#"><i class="fa-solid fa-book-bible me-2"></i>Kinh Thánh Trực Tuyến</a>
+            <button id="login-btn" onclick="loginAdmin()" class="btn btn-outline-light btn-sm">
+                <i class="fa-solid fa-lock me-1"></i> Admin Đăng nhập
+            </button>
+        </div>
+    </nav>
 
-<div class="container">
-    <h3>📖 Chọn nội dung xem</h3>
-    <div style="display: flex; gap: 10px;">
-        <select id="read-book">
-            <option value="Sáng thế ký">Sáng thế ký</option>
-            <option value="Xuất Ê-díp-tô Ký">Xuất Ê-díp-tô Ký</option>
-            <option value="Ma-thi-ơ">Ma-thi-ơ</option>
-            <option value="Giăng">Giăng</option>
-        </select>
-        <input type="number" id="read-chapter" value="1" min="1" style="width: 80px;">
-        <button onclick="readBible()" style="width: auto;">Đọc</button>
+    <div class="hero-section text-center">
+        <div class="container">
+            <h1 class="display-5 fw-bold mb-3">Lời Chúa Là Ngọn Đèn Cho Chân Tôi</h1>
+            <p class="lead mx-auto" style="max-width: 700px;">
+                Chào mừng bạn đến với trang web đọc Kinh Thánh Online. Kinh Thánh không chỉ là một cuốn sách tôn giáo, mà là bức thư tình yêu thương, là kim chỉ nam và là nguồn bình an vô tận cho tâm hồn mỗi người. Hãy mở lòng lắng nghe lời Chúa mỗi ngày.
+            </p>
+        </div>
     </div>
 
-    <div class="bible-box" id="bible-content">
-        Hãy chọn Sách, Chương và nhấn "Đọc" để xem nội dung.
+    <div class="container">
+        <div class="row">
+            
+            <div class="col-lg-8">
+                <div class="card card-custom p-4"><h4 class="fw-bold mb-3 text-secondary"><i class="fa-solid fa-book-open me-2"></i>Chọn nội dung xem</h4>
+                    
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-5">
+                            <select id="read-book" class="form-select">
+                                <option value="Sáng thế ký">Sáng thế ký</option>
+                                <option value="Xuất Ê-díp-tô Ký">Xuất Ê-díp-tô Ký</option>
+                                <option value="Ma-thi-ơ">Ma-thi-ơ</option>
+                                <option value="Giăng">Giăng</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <input type="number" id="read-chapter" class="form-control" value="1" min="1" placeholder="Chương">
+                        </div>
+                        <div class="col-md-4">
+                            <button onclick="readBible()" class="btn btn-orange w-100 fw-bold">Đọc Lời Chúa</button>
+                        </div>
+                    </div>
+
+                    <div class="p-4 rounded bible-box mb-2" id="bible-content">
+                        Chọn Sách, Chương và nhấn "Đọc Lời Chúa" để xem nội dung...
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card card-custom p-4">
+                    <h5 class="fw-bold mb-3"><i class="fa-solid fa-lightbulb text-warning me-2"></i>Ý nghĩa Kinh Thánh</h5>
+                    <p class="text-muted" style="font-size: 0.95rem;">
+                        Kinh Thánh bao gồm 66 sách chia làm hai phần: Cựu Ước và Tân Ước. Đây là nguồn mạc khải chân lý giúp con người thấu hiểu mục đích sống và tìm thấy ơn cứu rỗi.
+                    </p>
+                    <hr>
+                    <small class="text-secondary"><em>"Cả Kinh Thánh đều là bởi Đức Chúa Trời soi dẫn, có ích cho sự dạy dỗ, bẻ trách, sửa trị, dạy người trong sự công bình." (2 Ti-mô-thê 3:16)</em></small>
+                </div>
+            </div>
+
+        </div>
+
+        <div id="admin-panel" style="display: none;" class="mt-4 mb-5">
+            <div class="card card-custom border-danger p-4">
+                <h3 class="fw-bold text-danger mb-4"><i class="fa-solid fa-screwdriver-wrench me-2"></i>Bảng Quản Trị Hệ Thống</h3>
+
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="p-3 border rounded h-100 bg-light">
+                            <h5 class="fw-bold text-dark mb-3"><i class="fa-solid fa-plus me-2"></i>Thêm & Sửa bài viết</h5>
+                            
+                            <label class="form-label fw-bold">Tên Sách:</label><input type="text" id="add-book" class="form-control mb-2" placeholder="Ví dụ: Sáng thế ký">
+                            
+                            <label class="form-label fw-bold">Chương:</label>
+                            <input type="number" id="add-chapter" class="form-control mb-2" value="1" min="1">
+
+                            <label class="form-label fw-bold">Nội dung Kinh Thánh:</label>
+                            <textarea id="add-content" rows="8" class="form-control mb-3" placeholder="Nhập văn bản lời Chúa ở đây..."></textarea>
+                            
+                            <button onclick="saveBible()" class="btn btn-success w-100 fw-bold"><i class="fa-solid fa-floppy-disk me-2"></i>Lưu Lên Firebase</button>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 mb-4">
+                        <div class="p-3 border rounded h-100 bg-light">
+                            <h5 class="fw-bold text-dark mb-3"><i class="fa-solid fa-trash-can me-2"></i>Danh sách & Xóa bài</h5>
+                            <button onclick="loadAdminList()" class="btn btn-secondary btn-sm mb-3"><i class="fa-solid fa-rotate me-2"></i>Làm mới danh sách</button>
+                            
+                            <div id="admin-list-container" class="border rounded bg-white p-2" style="max-height: 335px; overflow-y: auto;">
+                                <div class="text-muted p-2">Bấm tải danh sách để xem nội dung...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div id="admin-panel">
-        <h3 style="color: #d35400;">✍️ Khu vực Quản trị (Thêm/Sửa nội dung)</h3>
-        <label>Tên Sách:</label>
-        <input type="text" id="add-book" placeholder="Ví dụ: Sáng thế ký">
-        
-        <label>Chương:</label>
-        <input type="number" id="add-chapter" value="1">
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
-        <label>Nội dung kinh thánh:</label>
-        <textarea id="add-content" rows="10" placeholder="Nhập văn bản lời Chúa ở đây..."></textarea>
-        
-        <button onclick="saveBible()">💾 Lưu lên mạng</button>
-    </div>
-</div>
+    <script>
+        // Cấu hình Firebase giữ nguyên chìa khóa của bạn
+        const firebaseConfig = {
+            apiKey: "AIzaSyCClWBrQEfF7gwt5X2Z7yRai_gTMJm07ig",
+            authDomain: "kinhthanh-db51f.firebaseapp.com",
+            projectId: "kinhthanh-db51f",
+            storageBucket: "kinhthanh-db51f.firebasestorage.app",
+            messagingSenderId: "1015931106833",
+            appId: "1:1015931106833:web:b3310c419534c93682e3b0",
+            measurementId: "G-MT017M7TL5"
+        };
 
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
 
-<script>
-    // 👇 CHÌA KHÓA BÍ MẬT CỦA BẠN ĐÃ ĐƯỢC ĐIỀN SẴN Ở ĐÂY 👇
-    const firebaseConfig = {
-        apiKey: "AIzaSyCClWBrQEfF7gwt5X2Z7yRai_gTMJm07ig",
-        authDomain: "kinhthanh-db51f.firebaseapp.com",
-        projectId: "kinhthanh-db51f",
-        storageBucket: "kinhthanh-db51f.firebasestorage.app",
-        messagingSenderId: "1015931106833",
-        appId: "1:1015931106833:web:b3310c419534c93682e3b0",
-        measurementId: "G-MT017M7TL5"
-    };
+        let isLogin = false;
 
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
+        // Giữ nguyên thông tin đăng nhập theo yêu cầu của bạn
+        function loginAdmin() {
+            if(!isLogin) {
+                const user = prompt("Nhập tài khoản:");
+                const pass = prompt("Nhập mật khẩu:");
 
-    let isLogin = false;
-
-    // Chức năng đăng nhập
-    function loginAdmin() {
-        if(!isLogin) {
-            const user = prompt("Nhập tài khoản:");
-            const pass = prompt("Nhập mật khẩu:");
-
-            if(user === "kinhthanh2026" && pass === "11112006") {
-                alert("Chúc mừng! Bạn đã đăng nhập thành công.");
-                isLogin = true;
-                document.getElementById('admin-panel').style.display = 'block';
-                document.getElementById('login-btn').innerText = "🔓 Đăng xuất";
+                if(user === "kinhthanh2026" && pass === "11112006") {
+                    alert("Chúc mừng! Bạn đã đăng nhập thành công.");isLogin = true;
+                    document.getElementById('admin-panel').style.display = 'block';
+                    document.getElementById('login-btn').innerHTML = '<i class="fa-solid fa-unlock me-1"></i> Đăng xuất';
+                    loadAdminList(); // Tự động load danh sách khi vừa đăng nhập
+                } else {
+                    alert("Sai tài khoản hoặc mật khẩu rồi bạn ơi!");
+                }
             } else {
-                alert("Sai tài khoản hoặc mật khẩu rồi bạn ơi!");
+                isLogin = false;
+                document.getElementById('admin-panel').style.display = 'none';
+                document.getElementById('login-btn').innerHTML = '<i class="fa-solid fa-lock me-1"></i> Admin Đăng nhập';
             }
-        } else {
-            isLogin = false;
-            document.getElementById('admin-panel').style.display = 'none';
-            document.getElementById('login-btn').innerText = "🔑 Admin Đăng nhập";
         }
-    }
 
-    // Chức năng Admin Lưu bài viết lên Firebase
-    function saveBible() {
-        if(!isLogin) return alert("Bạn chưa đăng nhập!");
+        // ĐỌC DỮ LIỆU (Cho người dùng xem)
+        function readBible() {
+            const book = document.getElementById('read-book').value;
+            const chapter = parseInt(document.getElementById('read-chapter').value);
+            const display = document.getElementById('bible-content');
 
-        const book = document.getElementById('add-book').value.trim();
-        const chapter = parseInt(document.getElementById('add-chapter').value);
-        const content = document.getElementById('add-content').value.trim();
+            display.innerHTML = '<div class="text-center text-muted"><i class="fa-solid fa-spinner fa-spin me-2"></i>Đang tải dữ liệu...</div>';
 
-        if(!book || !chapter || !content) return alert("Vui lòng điền đủ thông tin!");
+            db.collection("bible_data")
+              .where("book", "==", book)
+              .where("chapter", "==", chapter)
+              .get()
+              .then((querySnapshot) => {
+                  if (querySnapshot.empty) {
+                      display.innerHTML = '<span class="text-danger"><i class="fa-solid fa-triangle-exclamation me-2"></i>Nội dung này chưa được Admin tải lên.</span>';
+                  } else {
+                      querySnapshot.forEach((doc) => {
+                          display.innerText = doc.data().content;
+                      });
+                  }
+              })
+              .catch(err => {
+                  display.innerText = "Lỗi khi lấy dữ liệu từ mạng.";
+                  console.error(err);
+              });
+        }
 
-        const docId = `${book.replace(/\s+/g, '')}_ch${chapter}`;
+        // LƯU DỮ LIỆU LÊN FIREBASE (Admin)
+        function saveBible() {
+            if(!isLogin) return alert("Bạn chưa đăng nhập!");
 
-        db.collection("bible_data").doc(docId).set({
-            book: book,
-            chapter: chapter,
-            content: content
-        })
-        .then(() => {
-            alert("Đã lưu dữ liệu Kinh Thánh thành công!");
-            document.getElementById('add-content').value = ""; 
-        })
-        .catch(err => {
-            alert("Có lỗi xảy ra, hãy kiểm tra lại cấu hình Firebase!");
-            console.error(err);
-        });
-    }
+            const book = document.getElementById('add-book').value.trim();
+            const chapter = parseInt(document.getElementById('add-chapter').value);
+            const content = document.getElementById('add-content').value.trim();
 
-    // Chức năng Người dùng Đọc bài viết từ Firebase
-    function readBible() {
-        const book = document.getElementById('read-book').value;
-        const chapter = parseInt(document.getElementById('read-chapter').value);
-        const display = document.getElementById('bible-content');
+            if(!book || !chapter || !content) return alert("Vui lòng điền đủ thông tin!");
 
-        display.innerText = "Đang tải dữ liệu...";db.collection("bible_data")
-          .where("book", "==", book)
-          .where("chapter", "==", chapter)
-          .get()
-          .then((querySnapshot) => {
-              if (querySnapshot.empty) {
-                  display.innerText = "Nội dung Sách/Chương này chưa có dữ liệu. Xin Admin cập nhật thêm!";
-              } else {
-                  querySnapshot.forEach((doc) => {
-                      display.innerText = doc.data().content;
-                  });
-              }
-          })
-          .catch(err => {
-              display.innerText = "Lỗi khi lấy dữ liệu từ mạng.";
-          });
-    }
-</script>
+            const docId = `${book.replace(/\s+/g, '')}_ch${chapter}`;
+
+            db.collection("bible_data").doc(docId).set({
+                book: book,
+                chapter: chapter,
+                content: content
+            })
+            .then(() => {
+                alert("Đã lưu dữ liệu Kinh Thánh thành công!");
+                document.getElementById('add-content').value = ""; 
+                loadAdminList(); // Làm mới lại danh sách xóa})
+            .catch(err => {
+                alert("Có lỗi xảy ra, hãy kiểm tra lại cấu hình Firebase!");
+                console.error(err);
+            });
+        }
+
+        // 🌟 TÍNH NĂNG MỚI: TẢI DANH SÁCH BÀI VIẾT ĐỂ QUẢN LÝ
+        function loadAdminList() {
+            if(!isLogin) return;
+            const listContainer = document.getElementById('admin-list-container');
+            listContainer.innerHTML = '<div class="p-2 text-muted"><i class="fa-solid fa-spinner fa-spin me-2"></i>Đang quét dữ liệu...</div>';
+
+            db.collection("bible_data").get().then((querySnapshot) => {
+                if(querySnapshot.empty) {
+                    listContainer.innerHTML = '<div class="p-2 text-muted">Trống (Chưa có bài viết nào).</div>';
+                    return;
+                }
+
+                let htmlContent = '<ul class="list-group list-group-flush">';
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    htmlContent += `
+                        <li class="list-group-item d-flex justify-content-between align-items-center p-2">
+                            <div>
+                                <strong class="text-dark">${data.book}</strong> - Chương ${data.chapter}
+                            </div>
+                            <button class="btn btn-outline-danger btn-sm" onclick="deleteBible('${doc.id}', '${data.book}', ${data.chapter})">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </li>
+                    `;
+                });
+                htmlContent += '</ul>';
+                listContainer.innerHTML = htmlContent;
+            }).catch(err => {
+                listContainer.innerHTML = '<div class="p-2 text-danger">Lỗi khi tải danh sách.</div>';
+                console.error(err);
+            });
+        }
+
+        // 🌟 TÍNH NĂNG MỚI: XÓA NỘI DUNG (Admin)
+        function deleteBible(docId, book, chapter) {
+            if(!isLogin) return;
+            
+            const confirmDelete = confirm(`Bạn có chắc chắn muốn xóa "${book} - Chương ${chapter}" không? Hành động này không thể hoàn tác!`);
+            if(confirmDelete) {
+                db.collection("bible_data").doc(docId).delete().then(() => {
+                    alert(`Đã xóa thành công ${book} - Chương ${chapter}`);
+                    loadAdminList(); // Cập nhật lại danh sách sau khi xóa
+                }).catch(err => {
+                    alert("Xóa thất bại. Kiểm tra quyền Firebase.");
+                    console.error(err);
+                });
+            }
+        }
+    </script>
 </body>
 </html>
